@@ -11,29 +11,36 @@ title_center = "<h1 style='text-align: center'>WELCOME TO THE APP</h1>"
 
 
 class FinalPipeline():
-    def __init__(self, final_model):
-        self.label_encoder = LabelEncoder()
-        self.standard_scaler = StandardScaler()
-        self.function_transformer = FunctionTransformer(np.log1p, validate=False)
+    def __init__(self, final_model, scale_cols=None, encode_cols=None):
+        self.label_encoders = []
+        self.standard_scalers = []
         self.smote = SMOTE()
         self.model = final_model
+        self.scale_cols = scale_cols
+        self.encode_cols = encode_cols
 
     def fit(self, X_train, Y_train):
-        X_train['age'] = self.standard_scaler.fit_transform(X_train['age'].values.reshape(-1,1))
-        function_cols = ['bmi', 'avg_glucose_level']
-        for col in function_cols:
-            X_train[col] = self.function_transformer.fit_transform(X_train[col].values.reshape(-1,1))
-        X_train['gender'] = self.label_encoder.fit_transform(X_train['gender'])
+        if self.scale_cols is not None:
+            for col in self.scale_cols:
+                standard_scaler = StandardScaler()
+                X_train[col] = standard_scaler.fit_transform(X_train[col].values.reshape(-1,1))
+                self.standard_scalers.append(standard_scaler)
+        if self.encode_cols is not None:
+            for col in self.encode_cols:
+                label_encoder = LabelEncoder()
+                X_train[col] = label_encoder.fit_transform(X_train[col])
+                self.label_encoders.append(label_encoder)
         X_train_new, Y_train_new = self.smote.fit_resample(X_train, Y_train)
         self.model.fit(X_train_new, Y_train_new)
         return self
 
     def predict(self, X_test):
-        X_test['age'] = self.standard_scaler.transform(X_test['age'].values.reshape(-1,1))
-        function_cols = ['bmi', 'avg_glucose_level']
-        for col in function_cols:
-            X_test[col] = self.function_transformer.transform(X_test[col].values.reshape(-1,1))
-        X_test['gender'] = self.label_encoder.transform(X_test['gender'])
+        if self.scale_cols is not None:
+            for i, col in enumerate(self.scale_cols):
+                X_test[col] = self.standard_scalers[i].transform(X_test[col].values.reshape(-1,1))
+        if self.encode_cols is not None:
+            for i, col in enumerate(self.encode_cols):
+                X_test[col] = self.label_encoders[i].transform(X_test[col])
         Y_pred = self.model.predict(X_test)
         return Y_pred
 
