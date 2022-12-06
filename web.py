@@ -74,7 +74,7 @@ def get_prediction(record, pipeline):
 
 
 def main():
-    pipeline = joblib.load('scripts/pipeline.gz')
+    pipeline = joblib.load('pipeline.gz')
     st.title("Stroke Prediction App")
     record = get_user_input()
     if st.button("Predict"):
