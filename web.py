@@ -1,9 +1,10 @@
 import time
 import joblib
 import pandas as pd
+import numpy as np
 import streamlit as st
 from imblearn.over_sampling import SMOTE
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler, LabelEncoder, FunctionTransformer
 
 title_center = "<h1 style='text-align: center'>WELCOME TO THE APP</h1>"
 
@@ -13,22 +14,25 @@ class FinalPipeline():
     def __init__(self, final_model):
         self.label_encoder = LabelEncoder()
         self.standard_scaler = StandardScaler()
+        self.function_transformer = FunctionTransformer(np.log1p, validate=False)
         self.smote = SMOTE()
         self.model = final_model
 
     def fit(self, X_train, Y_train):
-        scale_cols = ['bmi', 'avg_glucose_level', 'age']
-        for col in scale_cols:
-            X_train[col] = self.standard_scaler.fit_transform(X_train[col].values.reshape(-1,1))
+        X_train['age'] = self.standard_scaler.fit_transform(X_train['age'].values.reshape(-1,1))
+        function_cols = ['bmi', 'avg_glucose_level']
+        for col in function_cols:
+            X_train[col] = self.function_transformer.fit_transform(X_train[col].values.reshape(-1,1))
         X_train['gender'] = self.label_encoder.fit_transform(X_train['gender'])
         X_train_new, Y_train_new = self.smote.fit_resample(X_train, Y_train)
         self.model.fit(X_train_new, Y_train_new)
         return self
 
     def predict(self, X_test):
-        scale_cols = ['bmi', 'avg_glucose_level', 'age']
-        for col in scale_cols:
-            X_test[col] = self.standard_scaler.transform(X_test[col].values.reshape(-1,1))
+        X_test['age'] = self.standard_scaler.transform(X_test['age'].values.reshape(-1,1))
+        function_cols = ['bmi', 'avg_glucose_level']
+        for col in function_cols:
+            X_test[col] = self.function_transformer.transform(X_test[col].values.reshape(-1,1))
         X_test['gender'] = self.label_encoder.transform(X_test['gender'])
         Y_pred = self.model.predict(X_test)
         return Y_pred
