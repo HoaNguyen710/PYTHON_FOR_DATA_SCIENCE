@@ -56,9 +56,9 @@ def get_user_input():
     ever_married = st.radio("Are you married?", ("Yes", "No"))
     work_type = st.radio("What's your work type?", ("Private", "Self-employed", "Goverment job", "Children", "Never worked"))
     residence_type = st.radio("What's your residence type?", ("Urban", "Rural"))
-    avg_glucose_level = st.slider("What's your average glucose level?", 0.0, 300.0, 100.0)
-    weight = st.slider("What's your weight? (kg)", 0.0, 200.0, 50.0, 0.1)
-    height = st.slider("What's your height? (m)", 0.0, 2.0, 0.5, 0.01)
+    avg_glucose_level = st.slider("What's your average glucose level?", 100.0, 300.0, 150.0)
+    weight = st.slider("What's your weight? (kg)", 30.0, 150.0, 50.0, 0.1)
+    height = st.slider("What's your height? (m)", 0.5, 2.5, 0.5, 0.01)
     bmi = weight / (height ** 2)
     smoking_status = st.radio("What's your smoking status?", ("Formerly smoked", "Never smoked", "Smokes", "Unknown"))
     data = {
