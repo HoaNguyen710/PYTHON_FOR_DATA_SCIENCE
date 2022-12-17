@@ -1,48 +1,23 @@
 import time
 import joblib
 import pandas as pd
-import numpy as np
 import streamlit as st
-from imblearn.over_sampling import SMOTE
-from sklearn.preprocessing import StandardScaler, LabelEncoder, FunctionTransformer
+import scipy.stats as stats
+from imblearn.pipeline import Pipeline
+from imblearn.combine import SMOTEENN
+from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.model_selection import RepeatedStratifiedKFold, train_test_split
+from sklearn.linear_model import LogisticRegression, SGDClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC, LinearSVC
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import RandomizedSearchCV, cross_val_predict
+from sklearn import metrics
 
 title_center = "<h1 style='text-align: center'>WELCOME TO THE APP</h1>"
-
-
-
-class FinalPipeline():
-    def __init__(self, final_model, scale_cols=None, encode_cols=None):
-        self.label_encoders = []
-        self.standard_scalers = []
-        self.smote = SMOTE()
-        self.model = final_model
-        self.scale_cols = scale_cols
-        self.encode_cols = encode_cols
-
-    def fit(self, X_train, Y_train):
-        if self.scale_cols is not None:
-            for col in self.scale_cols:
-                standard_scaler = StandardScaler()
-                X_train[col] = standard_scaler.fit_transform(X_train[col].values.reshape(-1,1))
-                self.standard_scalers.append(standard_scaler)
-        if self.encode_cols is not None:
-            for col in self.encode_cols:
-                label_encoder = LabelEncoder()
-                X_train[col] = label_encoder.fit_transform(X_train[col])
-                self.label_encoders.append(label_encoder)
-        X_train_new, Y_train_new = self.smote.fit_resample(X_train, Y_train)
-        self.model.fit(X_train_new, Y_train_new)
-        return self
-
-    def predict(self, X_test):
-        if self.scale_cols is not None:
-            for i, col in enumerate(self.scale_cols):
-                X_test[col] = self.standard_scalers[i].transform(X_test[col].values.reshape(-1,1))
-        if self.encode_cols is not None:
-            for i, col in enumerate(self.encode_cols):
-                X_test[col] = self.label_encoders[i].transform(X_test[col])
-        Y_pred = self.model.predict(X_test)
-        return Y_pred
 
 
 def get_user_input():
@@ -54,13 +29,13 @@ def get_user_input():
     heart_disease_string = st.radio("Do you have heart disease?", ("Yes", "No"))
     heart_disease = 1 if heart_disease_string == "Yes" else 0
     ever_married = st.radio("Are you married?", ("Yes", "No"))
-    work_type = st.radio("What's your work type?", ("Private", "Self-employed", "Goverment job", "Children", "Never worked"))
+    work_type = st.radio("What's your work type?", ("Private", "Self-employed", "Goverment job", "Never worked"))
     residence_type = st.radio("What's your residence type?", ("Urban", "Rural"))
-    avg_glucose_level = st.slider("What's your average glucose level?", 100.0, 300.0, 150.0)
-    weight = st.slider("What's your weight? (kg)", 30.0, 150.0, 50.0, 0.1)
-    height = st.slider("What's your height? (m)", 0.5, 2.5, 0.5, 0.01)
+    avg_glucose_level = st.slider("What's your average glucose level?", 0.0, 300.0, 100.0)
+    weight = st.slider("What's your weight? (kg)", 0.0, 200.0, 50.0, 0.1)
+    height = st.slider("What's your height? (m)", 0.0, 2.0, 0.5, 0.01)
     bmi = weight / (height ** 2)
-    smoking_status = st.radio("What's your smoking status?", ("Formerly smoked", "Never smoked", "Smokes", "Unknown"))
+    smoking_status = st.radio("What's your smoking status?", ("Formerly Smoked", "Never Smoked", "Smokes"))
     data = {
         "id": id,
         "gender": gender,
@@ -77,17 +52,28 @@ def get_user_input():
     record = pd.DataFrame(data, index=[0])
     return record
 
+def convert_string(record):
+    record = record.applymap(lambda x: x.lower() if isinstance(x, str) else x)
+    record = record.replace(' ', '_', regex=True).replace('-', '_', regex=True)
+    print(record.dtypes)
+    print(record)
+    return record
 
 def get_prediction(record, pipeline):
-    input = record.drop(columns=['id', 'ever_married', 'work_type', 'residence_type', 'smoking_status'])
+    input = record.drop(columns=['id'])
     prediction = pipeline.predict(input)
     return prediction
 
+def f2(y_true, y_pred):
+    return metrics.fbeta_score(y_true, y_pred, beta=2)
+
+f2_score = metrics.make_scorer(f2, greater_is_better=True)
 
 def main():
-    pipeline = joblib.load('pipeline.gz')
+    pipeline = joblib.load("scripts/pipeline.pkl")
     st.title("Stroke Prediction App")
     record = get_user_input()
+    record = convert_string(record)
     if st.button("Predict"):
         with st.spinner('Wait for it...'):
             time.sleep(2.5)
