@@ -70,7 +70,7 @@ def f2(y_true, y_pred):
 f2_score = metrics.make_scorer(f2, greater_is_better=True)
 
 def main():
-    pipeline = joblib.load("scripts/pipeline.pkl")
+    pipeline = joblib.load("pipeline.pkl")
     st.title("Stroke Prediction App")
     record = get_user_input()
     record = convert_string(record)
