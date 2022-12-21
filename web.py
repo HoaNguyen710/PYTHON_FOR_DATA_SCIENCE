@@ -7,17 +7,15 @@ from imblearn.pipeline import Pipeline
 from imblearn.combine import SMOTEENN
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.model_selection import RepeatedStratifiedKFold, train_test_split
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC, LinearSVC
+from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import RandomizedSearchCV, cross_val_predict
 from sklearn import metrics
-
-title_center = "<h1 style='text-align: center'>WELCOME TO THE APP</h1>"
 
 
 def get_user_input():
@@ -70,7 +68,7 @@ def f2(y_true, y_pred):
 f2_score = metrics.make_scorer(f2, greater_is_better=True)
 
 def main():
-    pipeline = joblib.load("pipeline.pkl")
+    pipeline = joblib.load("scripts/pipeline.pkl")
     st.title("Stroke Prediction App")
     record = get_user_input()
     record = convert_string(record)
