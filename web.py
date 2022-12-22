@@ -64,11 +64,6 @@ def get_prediction(record, pipeline):
     prediction = pipeline.predict(input)
     return prediction
 
-def f2(y_true, y_pred):
-    return metrics.fbeta_score(y_true, y_pred, beta=2)
-
-f2_score = metrics.make_scorer(f2, greater_is_better=True)
-
 def main():
     pipeline = joblib.load("pipeline.pkl")
     st.title("Stroke Prediction App")
