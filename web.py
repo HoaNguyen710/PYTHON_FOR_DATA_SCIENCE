@@ -28,6 +28,8 @@ def get_user_input():
     heart_disease = 1 if heart_disease_string == "Yes" else 0
     ever_married = st.radio("Are you married?", ("Yes", "No"))
     work_type = st.radio("What's your work type?", ("Private", "Self-employed", "Goverment job", "Never worked"))
+    if (work_type == "Goverment job"):
+        work_type = "Govt_job"
     residence_type = st.radio("What's your residence type?", ("Urban", "Rural"))
     avg_glucose_level = st.slider("What's your average glucose level?", 0.0, 300.0, 100.0)
     weight = st.slider("What's your weight? (kg)", 0.0, 200.0, 50.0, 0.1)
