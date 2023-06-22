@@ -4,10 +4,10 @@ Visit our web application here: [link](https://ngocduy3112-python-for-data-scien
 
 Members in the project:
 
-- 20280022 - Quách Phong Dương
+- 20280022 - Quách Phong Dương - Analyzed the data
 
-- 20280023 - Nguyễn Lê Ngọc Duy
+- 20280023 - Nguyễn Lê Ngọc Duy - Created model and built the web app
 
-- 20280033 - Nguyễn Thị Hoa
+- 20280033 - Nguyễn Thị Hoa - Analyzed the data
 
-- 20280048 - Nguyễn Thị Huyền
+- 20280048 - Nguyễn Thị Huyền - Analyzed the data
